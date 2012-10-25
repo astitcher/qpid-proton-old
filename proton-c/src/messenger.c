@@ -28,7 +28,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/time.h>
+#if 1
 #include <uuid/uuid.h>
+#else
+#include <uuid.h>
+#endif
 #include "util.h"
 
 struct pn_messenger_t {
@@ -51,11 +55,19 @@ char *build_name(const char *name)
   if (name) {
     return pn_strdup(name);
   } else {
-    char *generated = malloc(37*sizeof(char));
     uuid_t uuid;
+#if 1
+    char *generated = malloc(37*sizeof(char));
     uuid_generate(uuid);
     uuid_unparse_lower(uuid, generated);
     return generated;
+#else
+    char *generated;
+    uint32_t rc;
+    uuid_create(&uuid, &rc);
+    uuid_to_string(&uuid, &generated, &rc);
+    return pn_strdup(generated);
+#endif
   }
 }
 

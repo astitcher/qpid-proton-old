@@ -110,7 +110,7 @@ add_subdirectory(docs/api)
 
 # Should really be finding the uuid library appropriate for the platform
 # in lieu of doing this set the library name directly.
-set (UUID_LIB uuid)
+set (UUID_LIB "uuid")
 
 set (qpid-proton-platform
   src/driver.c
@@ -162,7 +162,7 @@ set_target_properties (
 set_target_properties (
    proton proton-dump
   PROPERTIES
-  COMPILE_FLAGS "-Wall -Werror -pedantic-errors -std=c99 -g -Iinclude -fPIC"
+  COMPILE_FLAGS "-Wall -Werror -pedantic-errors -std=gnu99"
 )
 
 # Install executables and libraries

@@ -19,8 +19,6 @@
  *
  */
 
-#define _POSIX_C_SOURCE 1
-
 #include <proton/ssl.h>
 #include "./ssl-internal.h"
 #include <proton/engine.h>
@@ -34,7 +32,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <assert.h>
-
 
 /** @file
  * SSL/TLS support API.
