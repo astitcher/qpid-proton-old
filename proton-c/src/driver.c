@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <poll.h>
 #include <stdio.h>
-#include <time.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -855,9 +854,21 @@ pn_connector_t *pn_driver_connector(pn_driver_t *d) {
   return NULL;
 }
 
+/* Allow for systems that do not implement clock_gettime()*/
+#ifdef USE_CLOCK_GETTIME
+#include <time.h>
 pn_timestamp_t pn_driver_now(pn_driver_t *driver)
 {
   struct timespec now;
   if (clock_gettime(CLOCK_REALTIME, &now)) pn_fatal("clock_gettime() failed\n");
   return ((pn_timestamp_t)now.tv_sec) * 1000 + (now.tv_nsec / 1000000);
 }
+#else
+#include <sys/time.h>
+pn_timestamp_t pn_driver_now(pn_driver_t *driver)
+{
+  struct timeval now;
+  if (gettimeofday(&now, NULL)) pn_fatal("gettimeofday failed\n");
+  return ((pn_timestamp_t)now.tv_sec) * 1000 + (now.tv_usec / 1000);
+}
+#endif
