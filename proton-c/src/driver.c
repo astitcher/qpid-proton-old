@@ -62,7 +62,7 @@ static inline int pn_create_socket() {
     int sock = socket(AF_INET, SOCK_STREAM, getprotobyname("tcp")->p_proto);
     if (sock == -1) return sock;
 
-    optval = 1;
+    int optval = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)) == -1) {
         close(sock);
         return -1;
