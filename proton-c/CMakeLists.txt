@@ -154,6 +154,7 @@ add_subdirectory(examples/messenger/c)
 
 set (qpid-proton-platform
   src/driver.c
+  src/platform.c
   ${pn_driver_ssl_impl}
 )
 
