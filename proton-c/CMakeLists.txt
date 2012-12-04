@@ -131,9 +131,31 @@ else (UUID_GENERATE_IN_LIBC)
   endif (UUID_GENERATE_IN_UUID)
 endif (UUID_GENERATE_IN_LIBC)
 
-option(ENABLE_WARNING_ERROR "Consider compiler warnings to be errors" ON)
+# Try to keep any platform specific overrides together here:
 
-# Set any additional platform specific C compiler flags
+# MacOS has a bunch of differences in build tools and process and so we have to turn some things
+# off if building there:
+if (APPLE)
+  set (NOBUILD_PHP ON)
+  set (NOENABLE_WARNING_ERROR ON)
+  set (NOENABLE_UNDEFINED_ERROR ON)
+endif (APPLE)
+
+# Add options here called <whatever> they will turn into "ENABLE_<whatever" and can be
+# overridden on a platform specific basis above by NOENABLE_<whatever>
+set (OPTIONS WARNING_ERROR UNDEFINED_ERROR)
+
+foreach (OPTION ${OPTIONS})
+  if (NOT "NOENABLE_${OPTION}")
+    set ("DEFAULT_${OPTION}" ON)
+  endif (NOT "NOENABLE_${OPTION}")
+endforeach (OPTION)
+
+# And add the option here too with help text
+option(ENABLE_WARNING_ERROR "Consider compiler warnings to be errors" ${DEFAULT_WARNING_ERROR})
+option(ENABLE_UNDEFINED_ERROR "Check for unresolved library symbols" ${DEFAULT_UNDEFINED_ERROR})
+
+# Set any additional compiler specific flags
 if (CMAKE_COMPILER_IS_GNUCC)
   if (ENABLE_WARNING_ERROR)
     set (WERROR "-Werror")
@@ -141,7 +163,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
   set (COMPILE_WARNING_FLAGS "${WERROR} -Wall -pedantic-errors")
   set (COMPILE_LANGUAGE_FLAGS "-std=c99")
   set (COMPILE_PLATFORM_FLAGS "-std=gnu99")
-  set (CATCH_UNDEFINED "-Wl,--no-undefined")
+  if (ENABLE_UNDEFINED_ERROR)
+    set (CATCH_UNDEFINED "-Wl,--no-undefined")
+  endif (ENABLE_UNDEFINED_ERROR)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 find_package(SWIG)

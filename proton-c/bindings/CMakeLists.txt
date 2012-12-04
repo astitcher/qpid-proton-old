@@ -20,14 +20,14 @@
 include(UseSWIG)
 
 # Add any new bindings here - the directory name must be the same as the binding name
-list(APPEND BINDINGS python ruby php)
+set (BINDINGS python ruby php)
 
 set (BINDING_DEPS qpid-proton)
 
 # Add a block here to detect the prerequisites to build each language binding:
 #
 # If the prerequisites for the binding are present set a variable called
-# DEFAULT_{name of binding} to ON
+# DEFAULT_{uppercase name of binding} to ON
 
 # Prerequites for Python wrapper:
 find_package (PythonLibs)
@@ -55,7 +55,11 @@ endif (PHP_CONFIG_EXE)
 # Shouldn't need to modify below here when adding new language binding
 foreach(BINDING ${BINDINGS})
   string(TOUPPER ${BINDING} UBINDING)
-  set("BUILD_${UBINDING}" ${DEFAULT_${UBINDING}} CACHE BOOL "Build ${BINDING} language binding" )
+  # Check whether default was overridden
+  if ("NOBUILD_${UBINDING}")
+    set ("DEFAULT_${UBINDING}" OFF)
+  endif ()
+  option("BUILD_${UBINDING}" "Build ${BINDING} language binding" ${DEFAULT_${UBINDING}})
   if ("BUILD_${UBINDING}")
     add_subdirectory(${BINDING})
   endif ()
