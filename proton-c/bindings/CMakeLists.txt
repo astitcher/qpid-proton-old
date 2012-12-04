@@ -19,27 +19,44 @@
 
 include(UseSWIG)
 
+# Add any new bindings here - the directory name must be the same as the binding name
+list(APPEND BINDINGS python ruby php)
+
 set (BINDING_DEPS qpid-proton)
 
-# Build wrapper for Python:
+# Add a block here to detect the prerequisites to build each language binding:
+#
+# If the prerequisites for the binding are present set a variable called
+# DEFAULT_{name of binding} to ON
+
+# Prerequites for Python wrapper:
 find_package (PythonLibs)
 if (PYTHONLIBS_FOUND)
-  add_subdirectory(python)
+  set (DEFAULT_PYTHON ON)
 endif (PYTHONLIBS_FOUND)
 
-# Build wrapper for Ruby:
+# Prerequites for Ruby:
 find_package(Ruby)
 if (RUBY_FOUND)
-  add_subdirectory(ruby)
+  set (DEFAULT_RUBY ON)
 endif (RUBY_FOUND)
 
-# Build wrapper for PHP
+# Prerequites for PHP:
 # For now, assume PHP support if the 'php-config' tool is present.
 # @todo: allow user to specify which php-config if multiple PHP sources installed!
 find_program(PHP_CONFIG_EXE php-config)
 if (PHP_CONFIG_EXE)
   find_program(PHP_EXE php)
   if (PHP_EXE)
-    add_subdirectory(php)
+    set (DEFAULT_PHP ON)
   endif (PHP_EXE)
 endif (PHP_CONFIG_EXE)
+
+# Shouldn't need to modify below here when adding new language binding
+foreach(BINDING ${BINDINGS})
+  string(TOUPPER ${BINDING} UBINDING)
+  set("BUILD_${UBINDING}" ${DEFAULT_${UBINDING}} CACHE BOOL "Build ${BINDING} language binding" )
+  if ("BUILD_${UBINDING}")
+    add_subdirectory(${BINDING})
+  endif ()
+endforeach(BINDING)
