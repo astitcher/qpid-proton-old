@@ -17,6 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import string
 
 from protocol import *
 
@@ -27,6 +28,7 @@ print
 print "#include \"proton/type_compat.h\""
 
 fields = {}
+field_names = {}
 
 for type in TYPES:
   fidx = 0
@@ -44,6 +46,7 @@ for type in TYPES:
   code = (hi << 32) + lo
   print "#define %s ((uint64_t) %s)" % (name, code)
   fields[code] = (type["@name"], [f["@name"] for f in type.query["field"]])
+  field_names[type["@name"]] = code
   idx += 1
 
 print """
@@ -55,9 +58,15 @@ typedef struct {
   const unsigned char field_count;
 } pn_fields_t;
 
+typedef struct {
+  const uint16_t name;
+  const unsigned char value;
+} pn_descriptor_t;
+
 extern const pn_fields_t FIELDS[];
 extern const char * const FIELD_STRINGPOOL;
 extern const uint16_t FIELD_NAME[];
+extern const pn_descriptor_t FIELD_SORTED_NAMES[];
 extern const uint16_t FIELD_FIELDS[];
 extern const unsigned char FIELD_MIN;
 extern const unsigned char FIELD_MAX;
@@ -94,7 +103,14 @@ for i in range(256):
     print '  offsetof(struct FIELD_STRINGS, FIELD_STRINGS_%s), /* %d */' % (iname, index)
     index += 1
 print "};"
-
+print
+print "const pn_descriptor_t FIELD_SORTED_NAMES[] = {"
+for f in sorted(field_names.items()):
+    name, code = f
+    iname = name.replace("-", "_");
+    print '  {offsetof(struct FIELD_STRINGS, FIELD_STRINGS_%s), %d},' % (iname, code)
+print "};"
+print
 print "/* This is an array of offsets into FIELD_STRINGPOOL */"
 print "const uint16_t FIELD_FIELDS[] = {"
 print "  offsetof(struct FIELD_STRINGS, FIELD_STRINGS_NULL),"
@@ -102,10 +118,11 @@ index = 1
 for i in range(256):
   if i in fields:
     name, fnames = fields[i]
+    print '  /* %s(%d)[%s] */' % (name, i, string.join(fnames, ','))
     if fnames:
       for f in fnames:
         ifname = f.replace("-", "_");
-        print '  offsetof(struct FIELD_STRINGS, FIELD_STRINGS_%s), /* %d (%s) */' % (ifname, index, name)
+        print '  offsetof(struct FIELD_STRINGS, FIELD_STRINGS_%s), /* %d */' % (ifname, index)
         index += 1
 print "};"
 
