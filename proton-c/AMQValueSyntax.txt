@@ -1,0 +1,57 @@
+;; Questions:
+;; * Why have separate tokens for plus, minus and dot? There's hardly any benefit
+;;   to not just having a numeric token or perhaps a separate float and integer token
+;; * No way to specify float inf or NaN
+;; * Add hex/octal/binary formats to integers?
+;; * Why not syntactically restrict the described value descriptor?
+;; * Why not allow numerics in the simple symbol values?
+;; * Why not have ":" token? As opposed to rolling it into the symbol token?
+;;   That way you could use ":" in other contexts too (in map for instance)
+;; * Why not process the string escapes in the lexer? That seems more conventional
+;; * What is "$" intended to be used for?
+;; * This syntax doesn't include the named parameter syntax used to pretty print
+;;   performatives
+
+;; Lexical tokens
+string ::= "\"" ([^\"]|"\\\"")* "\""
+
+binary_string ::= "b" string
+
+symbol_text ::= [a-zA-Z]*
+
+sign ::= [+-]
+mantissa ::=
+  [0-9]* ( "." [0-9]+ )?
+| [0-9]+ "."
+exponent ::= [eE] ( sign )? [0-9]+
+float ::= sign?  mantissa exponent?
+
+integer ::= sign? [0-9]+
+
+true ::= "t" "r" "u" "e"
+false ::= "f" "a" "l" "s" "e"
+null ::= "n" "u" "l" "l"
+
+;; Higher level syntax
+described_value ::=   "@" value value
+
+map ::= "{" ( value "=" value ( "," value "=" value )* )? "}"
+
+list ::= "[" ( value ( "," value )* )? "]"
+
+symbol ::=
+    ":" string
+|   ":" symbol_text
+
+value ::=
+  described value
+| map
+| list
+| binary_string
+| string
+| symbol
+| integer
+| float
+| true
+| false
+| null
