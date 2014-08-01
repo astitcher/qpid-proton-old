@@ -415,6 +415,9 @@ void pn_connection_collect(pn_connection_t *connection, pn_collector_t *collecto
   pn_decref2(connection->collector, connection);
   connection->collector = collector;
   pn_incref2(connection->collector, connection);
+  if (connection->transport) {
+    pn_collector_put(connection->collector, PN_TRANSPORT, connection->transport);
+  }
   pn_endpoint_t *endpoint = connection->endpoint_head;
   while (endpoint) {
     pn_collector_put(connection->collector, endpoint_init_event_map[endpoint->type], endpoint);

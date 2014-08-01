@@ -263,6 +263,7 @@ int pn_transport_bind(pn_transport_t *transport, pn_connection_t *connection)
   transport->connection = connection;
   connection->transport = transport;
   pn_incref2(connection, transport);
+  pn_collector_put(connection->collector, PN_TRANSPORT, transport);
   if (transport->open_rcvd) {
     PN_SET_REMOTE(connection->endpoint.state, PN_REMOTE_ACTIVE);
     pn_collector_put(connection->collector, PN_CONNECTION_REMOTE_OPEN, connection);
