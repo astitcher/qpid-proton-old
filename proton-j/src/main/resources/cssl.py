@@ -44,6 +44,9 @@ PN_SSL_MODE_P2J = {
   PN_SSL_MODE_SERVER: SslDomain.Mode.SERVER
 }
 
+def pn_ssl_present():
+  return True
+
 def pn_ssl_domain(mode):
   domain = Proton.sslDomain()
   domain.init(PN_SSL_MODE_P2J[mode])
@@ -94,9 +97,9 @@ def pn_ssl(transport):
     transport.ssl = pn_ssl_wrapper(transport)
     return transport.ssl
 
-def pn_ssl_init(ssl, domain, session_id):
+def pn_ssl_init(transport, domain, session_id):
   # XXX: session_id
-  ssl.impl = ssl.transport.impl.ssl(domain, None)
+  transport.ssl.impl = transport.impl.ssl(domain, None)
 
 def pn_ssl_resume_status(ssl):
   raise Skipped()

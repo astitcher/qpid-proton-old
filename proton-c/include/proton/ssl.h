@@ -90,6 +90,12 @@ typedef enum {
   PN_SSL_RESUME_REUSED          /**< Session resumed from previous session. */
 } pn_ssl_resume_status_t;
 
+/** Tests for SSL implementation present
+ *
+ *  @return true if we support SSL, false if not
+ */
+PN_EXTERN bool pn_ssl_present( void );
+
 /** Create an SSL configuration domain
  *
  * This method allocates an SSL domain object.  This object is used to hold the SSL
@@ -221,10 +227,10 @@ PN_EXTERN pn_ssl_t *pn_ssl(pn_transport_t *transport);
 
 /** Initialize an SSL session.
  *
- * This method configures an SSL object using the configuration provided by the given
- * domain.
+ * This method configures a transport to use the configuration provided by the given
+ * domain for any ssl session.
  *
- * @param[in] ssl the ssl session to configured.
+ * @param[in] transport the transport to configured.
  * @param[in] domain the ssl domain used to configure the SSL session.
  * @param[in] session_id if supplied, attempt to resume a previous SSL
  * session that used the same session_id.  If no previous SSL session
@@ -232,7 +238,7 @@ PN_EXTERN pn_ssl_t *pn_ssl(pn_transport_t *transport);
  * and stored for future session restore (see ::::pn_ssl_resume_status).
  * @return 0 on success, else an error code.
  */
-PN_EXTERN int pn_ssl_init( pn_ssl_t *ssl,
+PN_EXTERN int pn_ssl_init( pn_transport_t *transport,
                  pn_ssl_domain_t *domain,
                  const char *session_id);
 

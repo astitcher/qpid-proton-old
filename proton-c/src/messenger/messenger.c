@@ -327,14 +327,13 @@ static void pni_listener_readable(pn_selectable_t *sel)
   char name[1024];
   pn_socket_t sock = pn_accept(ctx->messenger->io, pn_selectable_fd(sel), name, 1024);
 
-  pn_transport_t *t = pn_transport();
+  pn_transport_t *t = pn_transport_server();
 
-  pn_ssl_t *ssl = pn_ssl(t);
-  pn_ssl_init(ssl, ctx->domain, NULL);
+  pn_ssl(t); // Just to force ssl creation
+  pn_ssl_init(t, ctx->domain, NULL);
   pn_sasl_t *sasl = pn_sasl(t);
 
   pn_sasl_mechanisms(sasl, "ANONYMOUS");
-  pn_sasl_server(sasl);
   pn_sasl_done(sasl, PN_SASL_OK);
 
   pn_connection_t *conn = pn_messenger_connection(ctx->messenger, sock, scheme, NULL, NULL, NULL, NULL, ctx);
@@ -950,7 +949,7 @@ static int pn_transport_config(pn_messenger_t *messenger,
       }
     }
     pn_ssl_t *ssl = pn_ssl(transport);
-    pn_ssl_init(ssl, d, NULL);
+    pn_ssl_init(transport, d, NULL);
     pn_ssl_set_peer_hostname(ssl, pn_connection_get_hostname(connection));
     pn_ssl_domain_free( d );
   }
@@ -960,7 +959,6 @@ static int pn_transport_config(pn_messenger_t *messenger,
     pn_sasl_plain(sasl, ctx->user, ctx->pass);
   } else {
     pn_sasl_mechanisms(sasl, "ANONYMOUS");
-    pn_sasl_client(sasl);
   }
 
   return 0;
@@ -1136,7 +1134,7 @@ void pn_messenger_process_connection(pn_messenger_t *messenger, pn_event_t *even
       pni_selectable_set_fd(ctx->selectable, sock);
       pn_transport_unbind(pn_connection_transport(conn));
       pn_connection_reset(conn);
-      pn_transport_t *t = pn_transport();
+      pn_transport_t *t = pn_transport_client();
       pn_transport_bind(t, conn);
       pn_transport_config(messenger, conn);
     }
@@ -1658,7 +1656,7 @@ pn_connection_t *pn_messenger_resolve(pn_messenger_t *messenger, const char *add
 
   pn_connection_t *connection =
     pn_messenger_connection(messenger, sock, scheme, user, pass, host, port, NULL);
-  pn_transport_t *transport = pn_transport();
+  pn_transport_t *transport = pn_transport_client();
   pn_transport_bind(transport, connection);
   err = pn_transport_config(messenger, connection);
   if (err) {

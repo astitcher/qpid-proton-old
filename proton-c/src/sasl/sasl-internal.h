@@ -57,4 +57,6 @@ void pn_sasl_trace(pn_sasl_t *sasl, pn_trace_t trace);
  */
 void pn_sasl_free(pn_sasl_t *sasl);
 
+bool pn_sasl_skipping_allowed(pn_sasl_t *sasl);
+
 #endif /* sasl-internal.h */
